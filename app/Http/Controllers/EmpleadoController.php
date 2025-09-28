@@ -14,7 +14,7 @@ class EmpleadoController extends Controller
      */
     public function index()
     {
-        $datos['empleados']=Empleado::paginate(5);
+        $datos['empleados']=Empleado::paginate(1);
 
 
         return view('empleado.index', $datos);
@@ -35,7 +35,25 @@ class EmpleadoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        // validacion de longitud de campos
+        $campos=[
+            'Nombre'=>'required|string|max:100',
+            'ApellidoPaterno'=>'required|string|max:100',
+            'ApellidoMaterno'=>'required|string|max:100',
+            'Correo'=>'required|email',
+            'Foto'=>'required|max:10000|mimes:jpeg,png,jpg',
+
+        ];
+        // error
+        $mensaje=[
+            'required'=>'El : atributo es requerido',
+            'Foto.required'=>'La foto es requerida'
+        ];
+
+        // VALIDACION
+        $request->validate($campos, $mensaje);
+
        // $datosEmpleado = request()->all();
        $datosEmpleado = request()->except('_token');
 
@@ -73,9 +91,34 @@ class EmpleadoController extends Controller
      */
     public function update(Request $request, $id)
 {
+    // VALIDACIONES
+
+    // validacion de longitud de campos
+        $campos=[
+            'Nombre'=>'required|string|max:100',
+            'ApellidoPaterno'=>'required|string|max:100',
+            'ApellidoMaterno'=>'required|string|max:100',
+            'Correo'=>'required|email',
+
+        ];
+        // error
+        $mensaje=[
+            'required'=>'El :attribute es requerido',
+        ];
+
+            if ($request->hasFile(key: 'Foto')) {
+            $campos=[ 'Foto'=>'required|max:10000|mimes:jpeg,png,jpg',];
+            $mensaje=[
+            'required'=>'El : atributo es requerido',
+            'Foto.required'=>'La foto es requerida'
+            ];
+            }
+        // VALIDACION
+        $request->validate($campos, $mensaje);
+
     $datosEmpleado = request()->except('_token', '_method');
 
-    if ($request->hasFile('Foto')) {
+    if ($request->hasFile(key: 'Foto')) {
         $empleado = Empleado::findOrFail($id);
 
         // Eliminar foto anterior si existe
@@ -91,7 +134,9 @@ class EmpleadoController extends Controller
 
     $empleado = Empleado::findOrFail($id);
 
-    return view('empleado.edit', compact('empleado'));
+    // return view('empleado.edit', compact('empleado'));
+    return redirect('empleado')->with('mensaje', 'Empleado Modificado');
+
 }
 
 
