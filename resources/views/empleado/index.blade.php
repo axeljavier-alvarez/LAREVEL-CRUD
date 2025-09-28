@@ -1,6 +1,19 @@
-MOSTRAR LISTA DE EMPLEADOS
-<table class="table table-light">
-    <thead class="thead-light">
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+
+
+
+@if(Session::has('mensaje'))
+{{ Session::get('mensaje') }}
+@endif
+
+<a href="{{  url('empleado/create') }}" class="btn btn-success">Registrar nuevo empleado</a>
+<br>
+<br>
+<table class="table table-bordered">
+    <thead class="table-primary text-center">
         <tr>
             <th>#</th>
             <th>Foto</th>
@@ -12,14 +25,14 @@ MOSTRAR LISTA DE EMPLEADOS
 
         </tr>
     </thead>
-    <tbody>
+    <tbody class="text-center">
         @foreach ( $empleados as $empleado )
 
         <tr>
             <td>{{ $empleado ->id }}</td>
 <!-- agregar esta imagen -->
  <td>
-    <img src="{{ asset('storage').'/'.$empleado->Foto }}" width="100">
+    <img class="img-thumbnail img-fluid" src="{{ asset('storage').'/'.$empleado->Foto }}" width="100">
  </td>
 <!--            <td>{{ $empleado ->Foto }}</td>
  -->
@@ -28,15 +41,16 @@ MOSTRAR LISTA DE EMPLEADOS
             <td>{{ $empleado ->ApellidoMaterno }}</td>
             <td>{{ $empleado ->Correo }}</td>
             <td>
-                <a href="{{ url('/empleado/'.$empleado->id.'/edit') }}">
+                <a href="{{ url('/empleado/'.$empleado->id.'/edit') }}"
+                method="post" class="btn btn-warning">
                     Editar
                 </a>
-                |
+                |@csrf
                     <!-- BOTON DE ELIMINAR -->
-                <form action="{{  url('/empleado/'.$empleado->id) }}" method="post">
+                <form action="{{  url('/empleado/'.$empleado->id) }}" class="d-inline" method="post">
                     @csrf
                     {{ method_field('DELETE') }}
-                    <input type="submit" onclick="return confirm('¿Quieres borrar?')" value="Borrar">
+                    <input class="btn btn-danger" type="submit" onclick="return confirm('¿Quieres borrar?')" value="Borrar">
                 </form>
             </td>
         </tr>
@@ -45,3 +59,7 @@ MOSTRAR LISTA DE EMPLEADOS
 
     </tbody>
 </table>
+</div>
+
+@endsection
+

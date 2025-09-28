@@ -44,7 +44,8 @@ class EmpleadoController extends Controller
        }
 
        Empleado::insert($datosEmpleado);
-        return response()->json($datosEmpleado);
+      //return response()->json($datosEmpleado);
+      return redirect('empleado')->with('mensaje', 'Empleado agregado con exito');
     }
 
     /**
@@ -71,40 +72,46 @@ class EmpleadoController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
-        $datosEmpleado = request()->except('_token', '_method');
+{
+    $datosEmpleado = request()->except('_token', '_method');
 
-        // ALMACENAR IMAGEN EN CARPETA PROYECTO
-        // borrado arriba
-          if($request->hasFile('Foto')){
-            // parte del borrado
-                    // RECUPERANDO INFO
-            $empleado=Empleado::findOrFail($id);
-            //  A TRAVES DE FOTOGRAFIA CONCATENE Y BORRE
-            Storage::delete(('public/'.$empleado->Foto));
-            // ACTUALIZAR INFO
-        $datosEmpleado['Foto']=$request->file('Foto')->store('uploads', 'public');
-       }
+    if ($request->hasFile('Foto')) {
+        $empleado = Empleado::findOrFail($id);
 
+        // Eliminar foto anterior si existe
+        if ($empleado->Foto && Storage::disk('public')->exists($empleado->Foto)) {
+            Storage::disk('public')->delete($empleado->Foto);
+        }
 
-        Empleado::where('id', '=', $id)->update($datosEmpleado);
+        // Guardar nueva foto
+        $datosEmpleado['Foto'] = $request->file('Foto')->store('uploads', 'public');
+    }
 
-        // REGRESAR A FORM
+    Empleado::where('id', '=', $id)->update($datosEmpleado);
 
     $empleado = Empleado::findOrFail($id);
 
     return view('empleado.edit', compact('empleado'));
+}
 
-    }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
-    {
-        //
+{
+    $empleado = Empleado::findOrFail($id);
 
-        Empleado::destroy($id);
-        return redirect('empleado');
+    if ($empleado->Foto && Storage::disk('public')->exists($empleado->Foto)) {
+        Storage::disk('public')->delete($empleado->Foto);
     }
+
+    Empleado::destroy($id);
+
+    // return redirect('empleado');
+    // MOSTRAR MENSAJE
+    return redirect('empleado')->with('mensaje', 'Empleado Borrado');
+}
+
 }
